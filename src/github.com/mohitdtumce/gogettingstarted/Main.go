@@ -1,85 +1,104 @@
 package main
 
-import (
-	"fmt"
-	"math"
-	"strconv"
-)
-
-// Variable declaration/initialization at package level
-var fullname = "Mohit Sharma"
-
-// Variable declaration/initialization block at package level
-var (
-	name = "Mohit"
-	age int8 = 24
-	company = "Microsoft"
-	salary float32 = 1000
-	increment = 10.0
-	description string
-)
+import "fmt"
 
 func main()  {
 	// ==================================================
-	// 2.1 Variable Declaration
-	
-	// Method 1
-	var i int
-	i = 31
-
-	// Method 2
-	var j int = 32
-
-	// Method 3
-	k := 33
-
-	fmt.Println(i, j, k)
-
-	// We can define variables on package level as well. 
-	// But keep in mind that automatic inference of variable types(as shown in method 3) won't work there
-	
-	fmt.Printf("%v %T\n", name, name)
-	fmt.Printf("%v %T\n", age, age)
-	fmt.Printf("%v %T\n", company, company)
-	fmt.Printf("%v %T\n", salary, salary)
-	fmt.Printf("%v %T\n", increment, increment)
-	description = "Software Developer"
-	fmt.Printf("%v %T\n", description, description)
+	// 3.0 Primitives
 
 	// ==================================================
-	// 2.2 Re-declaration and shadowing
-
-	// Note -> A variable must be used if declared
-	// Note -> There are 3 scopes -> block, local, global
-	// Re-declaration of variable 'fullname' which is also declared on package level outside main method.
-	// Local variable declared within the block will take precendence => called Shadowing. 
-	// Outer variable is still available but it is hidden.
-	fmt.Println(fullname)
-	var fullname string = "Rohit Saxena"
-	fmt.Println(fullname)
-
-	// ==================================================
-	// 2.3 Visibility
-	// Lower case variables are scoped to the packages. 
-	// However if we use upper case variables then Go compiler will expose them to the outside world
-	var Person string = "Mohit Sharma"
-	fmt.Println(Person)
-
-	// ==================================================
-	// 2.4 Naming Convention
-
-	// ==================================================
-	// 2.5 Type Conversion
-
-	var x float64 = math.Pi*10
+	// 3.1 Boolean
+	var w bool
+	var x bool = true
+	var y bool = false
+	z := (1 == 1)
+	fmt.Printf("%v, %T\n", w, w)
 	fmt.Printf("%v, %T\n", x, x)
-
-	var y int
-	y = int(x)
 	fmt.Printf("%v, %T\n", y, y)
-
-	var z string
-	z = strconv.Itoa(y)
 	fmt.Printf("%v, %T\n", z, z)
 
+
+	// ==================================================
+	// 3.2 Numeric - Integer, Floating, Complex
+	
+	// Signed Integer Type 
+	// int8 	[-128, 127]
+	// int16	[-32 768, 32 767]
+	// int32	[-2 147 483 648, 2 147 483 647]
+	// int64	[-9 223 372 036 854 775 808, 9 223 372 036 854 775 807]
+
+	// Unsigned Integer Type 
+	// uint8 	[0, 255]
+	// uint16	[0, 65 535]
+	// uint32	[0, 4 294 967 295]
+	// We don't have 64 bit unsigned integer
+
+	// Note -> We cannot do operations on two operands of different types unless we do explicit type casting
+	var i int8 = 10
+	var j int = 2
+	k := (int(i) + j)
+	fmt.Printf("%v, %T\n", k, k)
+
+	// Bitwise operators
+	var a int = 10  		// 1010
+	var b int = 3			// 0011
+	fmt.Println(a & b)		// 0010 => 2
+	fmt.Println(a | b)		// 1011	=> 11
+	fmt.Println(a ^ b)		// 1001	=> 9
+
+	var c int = 3 			// 0011
+	fmt.Println(c << 1)		// 0110 => 6
+	fmt.Println(c << 3)		// 11000 => 24
+	fmt.Println(c >> 1)		// 0001 => 1
+	fmt.Println(c >> 2)		// 0000 => 0
+
+	// Floating Type
+	// float32 [+/-1.8E(-38), +/- 3.4E(38)]
+	// float64 [+/-2.23E(-308), +/- 1.8E(308)] default
+
+	var m float32 = 3.14
+	fmt.Printf("%v, %T\n", m, m)
+	m = 13.7e-72
+	fmt.Printf("%v, %T\n", m, m)
+	m = 2.1e+14
+	fmt.Printf("%v, %T\n", m, m)
+	var n float64 = 13.7e-72
+	fmt.Printf("%v, %T\n", n, n)
+	
+	p := 10.2
+	q := 3.7
+	fmt.Println(p + q)
+	fmt.Println(p - q)
+	fmt.Println(p * q)
+	fmt.Println(p / q)
+
+	// Complex Type
+	// complex64 and complex128 (default)
+
+	var r complex64 = 1 + 2i
+	fmt.Printf("%v, %T\n", real(r), real(r))
+	var s = 2 + 2i
+	fmt.Printf("%v, %T\n", s, s)
+
+	// ==================================================
+	// 3.3 Text
+
+	str := "This is utf8 encoded => uint8."
+	fmt.Printf("%v, %T\n", str, str)
+	// Note -> String can be treated as collection of characters
+	fmt.Printf("%v, %T\n", str[2], str[2])
+	fmt.Printf("%v, %T\n", string(str[2]), str[2])
+	// Note -> Strings are immutable. So str[2] = 'u' won't work.
+
+	// String concatenation
+	anotherStr := " This is also utf8 encoded."
+	fmt.Printf("%v, %T\n", str + anotherStr, str + anotherStr)
+
+	// Converting string into byte arrays
+	byteArray := []byte(str)
+	fmt.Printf("%v, %T\n", byteArray, byteArray)
+
+	// rune represents utf32 int32 character
+	var rn rune = 'a'
+	fmt.Printf("%v, %T\n", rn, rn)
 }
