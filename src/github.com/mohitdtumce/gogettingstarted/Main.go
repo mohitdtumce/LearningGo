@@ -2,7 +2,6 @@ package main
 
 import (
 	"fmt"
-	"io/ioutil"
 	"log"
 	"net/http"
 )
@@ -11,47 +10,67 @@ func main() {
 	// ==================================================
 	// 9.0 Defer, Panic and Recovery
 
-	/*
-	A defer statement defers the execution of a function until the surrounding function returns
-	*/
+	// Classic example of panic situation
+	a, b := 1, 0
+	ans := a / b
+	fmt.Println(ans)
+
+	// Simple Webapplication which listens all the routes specified by "/" and port 8080
+	http.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
+		w.Write([]byte("Mushi Mushi"))
+	})
+
+	err := http.ListenAndServe(":8080", nil)
+	if err != nil {
+		// For Instance if we try to run this application concurrently in different consoles, we get following error
+		// panic: listen tcp :8080: bind: address already in use
+		panic(err.Error())
+	}
+
+	// Example 3: defer executes before panic
 	fmt.Println("Start")
-	defer fmt.Println("Middle-I")
-	defer fmt.Println("Middle-II")
+	defer fmt.Println("This was deferred")
+	panic("Something bad just happened")
 	fmt.Println("End")
 	/*
-	Deferred functions execute in LIFO order (Stack). So the output of the above snippet of code will be :-
-	Start
-	End
-	Middle-II
-	Middle-I
+		Output of example 3 will be :-
+		Start
+		This was deferred
+		panic: Something bad just happened
 	*/
 
-	// Example - 2
-	// Open the resource
-	res, err := http.Get("https://www.google.com/robots.txt")
-	if err != nil {
-		log.Fatal(err)
-	}
-	// Close the resource
-	defer res.Body.Close()
-	/* 
-		If you are working with a lot of resources then you should not use the defer statement. 
-		This is because all the opened resources will be closed only once the application executes 
-		and in the meantime those opened resouces will clog the memory
+	// Example 4: Defer and Ananomous functions
+	fmt.Println("Start")
+	defer func ()  {
+		if err := recover(); err != nil {
+			log.Println("Error:", err)
+		}
+	}()
+	panic("Something bad has happened")
+	fmt.Println("End")	// Unreachable code
+
+	// Example 5
+	fmt.Println("Start")
+	panicker()
+	fmt.Println("End")
+	/*
+		Output of example 5 :-
+		Start
+		About the panic
+		2020/05/27 00:02:39 Error: Something bad has happened
+		panic: Something bad has happened [recovered]
+		        panic: Rethrowing panic if error cannot be handled
 	*/
+}
 
-	robots, err := ioutil.ReadAll(res.Body)
-	
-	if err != nil {
-		log.Fatal(err)
-	}
-	fmt.Printf("%s", robots)
-
-	// The deferred call's arguments are evaluated immediately, but the function call is not executed until the surrounding function returns.
-	// So, the output of the below code snipet will be "start" and not "end"
-	a := "start"
-	defer fmt.Println(a)
-	a = "end"
-
-
+func panicker() {
+	fmt.Println("About the panic")
+	defer func() {
+		if err := recover(); err != nil {
+			log.Println("Error:", err)
+			panic("Rethrowing panic if error cannot be handled")
+		}
+	}()
+	panic("Something bad has happened")
+	fmt.Println("Done Panicking")
 }
