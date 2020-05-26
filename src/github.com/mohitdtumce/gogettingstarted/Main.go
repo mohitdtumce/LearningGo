@@ -8,25 +8,25 @@ func main() {
 	// ==================================================
 	// 8.0 Looping
 
-	// Simple for loop
+	// Simple for loop (initializer, test, incrementer)
 	for i := 0; i < 5; i += 2 {
 		fmt.Println(i)
 	}
 
-	// More than one iterators
+	// More than one iterators (initializer, test, incrementer)
 	for i, j := 1, 0; i < 20; i, j = i*2, j+1 {
 		fmt.Println(i, j)
 	}
 
 	// Now iterator is scoped to main method instead of just the for-loop
 	// Iterator and Increment expressions inside the for-loop body
-	itr := 0
+	itr := 0 
 	for itr < 5 {
 		fmt.Println("Another form", itr)
 		itr++
 	}
 
-	// break keyword
+	// [Early Exit] break keyword
 	jtr := 1
 	for {
 		fmt.Print(jtr, " ")
@@ -37,7 +37,7 @@ func main() {
 		jtr++
 	}
 
-	// continue keywork
+	// [Early Exit] continue keywork
 	for i := 1; i < 4; i++ {
 		if i%2 == 0 {
 			continue
@@ -53,7 +53,7 @@ func main() {
 		fmt.Println()
 	}
 
-	// To break from all the loops under the label 'MyLabel'
+	// [Early Exit] Labels: To break from all the loops under the label 'MyLabel'
 	MyLabel:
 	for i := 1; i <= 5; i++ {
 		for j := 1; j <= 5; j++ {
@@ -66,6 +66,7 @@ func main() {
 		fmt.Println()
 	}
 
+	// Looping over collections
 	// Iterating over a collection using for-range
 	s := []int{11, 12, 13}
 	for k, v := range s {
