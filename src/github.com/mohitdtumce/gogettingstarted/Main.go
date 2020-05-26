@@ -2,118 +2,190 @@ package main
 
 import (
 	"fmt"
+	"reflect"
 )
+
+const (
+	deptIT int = 101
+	deptHR int = 202
+	deptPR int = 303
+	deptEE int = 404
+)
+
+/*
+Struct can be compared with classes in OOP
+Struct is a collection of disparate data types that describe a single concept.
+Since employee follows camelCase, it is local to the package and cannot be accessed outside the package.
+If you wish to export the struct outside the package, simply use PascalCase.
+
+You'll notice that attribute names are also written in camelcase.
+It follows the general naming convention of Go as well
+which means they cannot be accessed in other packages.
+*/
+type employee struct {
+	id       int
+	fullName string
+	deptCode int
+	projects []string
+}
+
+// Animal struct
+type Animal struct {
+	Name   string
+	Origin string
+}
+
+// Bird struct
+type Bird struct {
+	Animal
+	SpeedKPH float32
+	CanFly   bool
+}
+
+// Doctor struct
+type Doctor struct {
+	Name       string `required max:100`
+	Speciality string
+}
 
 func main() {
 	// ==================================================
-	// 5.0 Arrays and Slices
+	// 6.0 Maps and Structs
 
 	// ==================================================
-	// 5.1 [Arrays] Creation & Built-in functions
-	// Arrays are collection of items with same type.
-	// Arrays have fixed size.
+	// 6.1 [Maps] Creation and Manipulation
 
-	// Declaration - 1/3
-	arr1 := [3]string{"Mohit", "Rohit", "Vishal"}
-	fmt.Println(arr1)
-
-	// Declaration - 2/3
-	arr2 := [...]string{"Mohit", "Rohit", "Vishal"}
-	fmt.Println(arr2)
-
-	// Declaration - 3/3
-	var arr3 [5]string 
-	arr3 = [...]string{"Mohit", "Rohit", "Vishal", "Rajat", "Danish"}
-	fmt.Println(arr3)
-
-	var grades [5]int
-	grades = [5]int{77, 95, 95, 88, 80}
-	// Arrays are passed by value. So copies refer to different underlying data
-	anotherGrades := grades  
-	anotherGrades[0] = 100
-	fmt.Printf("Grades: %v\n", grades)
-	fmt.Printf("Another Grades: %v\n", anotherGrades)
-
-	const row, col = 5, 3
-	matrix := [row][col]int{{}}
-	for i := 0; i < row; i++ {
-		for j := 0; j < col; j++ {
-			matrix[i][j] = i + j
-		}
+	// Creation: Literal syntax to create a map
+	statePopulations := map[string]int{
+		"California": 12,
+		"Texas":      13,
+		"Florida":    14,
 	}
-	fmt.Println(matrix)
+	fmt.Println(statePopulations)
 
-	var identityMatrix [3][3]int = [3][3] int{{1, 0, 0}, {0, 1, 0}, {0, 0, 1}}
-	fmt.Println(identityMatrix)
+	/* Basic constraint on a key while creating a map is that it can be tested for equality.
+	Most of the types can be used for key but not all. For example slices and another map.
+	m := map[[]int]int {}  will throw an error saying "Invalid map key type"
+	However arrays are fine. So below code will work just fine.
+	*/
+	m := map[[3]int]int{}
+	fmt.Println(m)
 
-	// To find the length of array, we can use inbuilt function len()
-	fmt.Println(len(grades))
-	// len() method returns the size of array
-	fmt.Println(len(matrix), len(matrix[0]))
-	fmt.Println(len(identityMatrix), len(identityMatrix[0]))
+	// Creation: Inbuilt make function to create map
+	countryPopulations := make(map[string]int)
+	countryPopulations = map[string]int{
+		"India": 100,
+		"US":    25,
+		"China": 32,
+	}
+	fmt.Println(countryPopulations)
+
+	// Fetching the value associated with the given key
+	fmt.Println(countryPopulations["India"])   // Key present
+	fmt.Println(countryPopulations["Britain"]) // Key not present will return the value 0
+
+	// To check if a key is present in the map, we can use below written syntax as well.
+	_, ok := countryPopulations["Britain"]
+	fmt.Println(ok)
+	_, ok = countryPopulations["India"]
+	fmt.Println(ok)
+
+	// Adding new key
+	countryPopulations["Australia"] = 12
+	fmt.Println(countryPopulations)
+	fmt.Println(countryPopulations["Australia"])
+
+	// Important: Order of keys is not guaranteed in maps.
+
+	// Deleting keys from the map
+	fmt.Println(countryPopulations)
+	delete(countryPopulations, "Australia")
+	fmt.Println(countryPopulations)
+
+	// len() method will provide the length of map
+	fmt.Println(len(countryPopulations))
+
+	// Map is passed by reference
+	anotherCountryPopulations := countryPopulations
+	delete(anotherCountryPopulations, "India")
+	fmt.Println(countryPopulations)
+	fmt.Println(anotherCountryPopulations)
 
 	// ==================================================
-	// 5.2 [Slices] Creation & Built-in functions
-	// Slices are backed by Arrays. They don't have fixed size.
-	slc := []int{1, 2, 3, 4, 5, 6}
-	slc1 := slc // Slices are passed by reference
-	slc1[0] = 100
-	fmt.Println(slc, slc1)
-	
-	fmt.Printf("Size: %v, %v\n", len(slc), len(slc1))
-	fmt.Printf("Capacity: %v %v\n", cap(slc), cap(slc1))
+	// 6.2 [Structs] Creation, Naming Conventions, Embedding, and Tags
 
-	// Slicing operation
-	a := []int{1, 2, 3, 4, 5, 6, 7, 8, 9, 10}
-	b := a[:]
-	c := a[3:]
-	d := a[:6]
-	e := a[3:6]
-	fmt.Println(a ,"\n",b ,"\n",c ,"\n",d ,"\n", e)
-
-	// As mentioned, slices are passed by reference
-	// So change in any slice object will change the underlying data.
-	a[5] = 42
-	fmt.Println(a ,"\n",b ,"\n",c ,"\n",d ,"\n", e)
-
-	// Using in-built method to create slices
-	f := make([]int, 5, 100)
-	fmt.Println(f, len(f), cap(f))
-
-	g := []int{}
-	fmt.Println(g, len(g), cap(g))
-
-	g = append(g, 1)
-	fmt.Println(g, len(g), cap(g))
-
-	g = append(g, 2, 3, 4, 5)
-	fmt.Println(g, len(g), cap(g))
-
-	g = append(g, []int{6, 7, 8, 9, 10}...)
-	fmt.Println(g, len(g), cap(g))
-
-	h := []int{11, 12, 13, 14}
-	g = append(g, h...)
-	fmt.Println(g, len(g), cap(g))
-
-	// Slices as stacks and queues
-	// Removing the first element (FIFO)
-	m := []int{1, 2, 3, 4, 5}
-	for len(m) > 0 {
-		fmt.Println(m)
-		m = m[1:]
+	counter := 0
+	mohit := employee{
+		id:       counter,
+		fullName: "Mohit Sharma",
+		deptCode: deptIT,
+		projects: []string{
+			"DC Migration",
+			"Preorder and Partpayment",
+		},
 	}
-	// Removing the last element (LIFO)
-	n := []int{1, 2, 3, 4, 5, 6, 7, 8}
-	for len(n) > 0 {
-		fmt.Println(n)
-		n = n[:len(n)-1]
+	counter++
+
+	rohit := employee{
+		id:       counter,
+		fullName: "Rohit Sharma",
+		deptCode: deptEE,
+		projects: []string{
+			"Power Plant",
+		},
+	}
+	counter++
+
+	// Accessing specific attribute
+	fmt.Println("Mohit's Projects: ", mohit.projects[0])
+	fmt.Println("Fullname ", mohit.fullName)
+
+	employees := []employee{}
+	employees = append(employees, []employee{mohit, rohit}...)
+	fmt.Println(employees)
+
+	// Anonamous struct
+	vishal := struct {
+		name string
+		age  int8
+	}{
+		name: "Vishal Singh",
+		age:  42,
+	}
+	fmt.Printf("%v,  %T\n", vishal, vishal)
+
+	vishal.age = 26
+	fmt.Printf("%v,  %T\n", vishal, vishal)
+
+	// Unlike maps and slices, structs are passed by values
+	anotherVishal := vishal
+	anotherVishal.age = 101
+	fmt.Println(vishal, '\n', anotherVishal)
+
+	// If you do want to point to the same data, we can use & (address of) operator.
+	sameVishal := &vishal
+	sameVishal.age = 87
+	fmt.Println(vishal, '\n', sameVishal)
+
+	// Embedding - Go doesn't have inheritence. It uses something called composition through embedding
+	b := Bird{}
+	b.Name = "Emu"
+	b.Origin = "Australia"
+	b.SpeedKPH = 48
+	b.CanFly = false
+	fmt.Println(b)
+
+	c := Bird{
+		Animal:   Animal{Name: "Penguin", Origin: "NewZealand"},
+		SpeedKPH: 12,
+		CanFly:   false,
 	}
 
-	// Removing a subarray of elements from the middle of the slice
-	// For example: Removing 4, 5, 6
-	o := []int{1, 2, 3, 4, 5, 6, 7, 8, 9, 10}
-	o = append(o[:3], o[6:]...)
-	fmt.Println(o)
+	fmt.Println(c)
 
+	// Tags
+	t := reflect.TypeOf(Doctor{})
+	field, _ := t.FieldByName("Name")
+	fmt.Println(field)
+	fmt.Println(field.Tag)
 }
