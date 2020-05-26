@@ -2,190 +2,130 @@ package main
 
 import (
 	"fmt"
-	"reflect"
+	"math"
 )
 
-const (
-	deptIT int = 101
-	deptHR int = 202
-	deptPR int = 303
-	deptEE int = 404
-)
-
-/*
-Struct can be compared with classes in OOP
-Struct is a collection of disparate data types that describe a single concept.
-Since employee follows camelCase, it is local to the package and cannot be accessed outside the package.
-If you wish to export the struct outside the package, simply use PascalCase.
-
-You'll notice that attribute names are also written in camelcase.
-It follows the general naming convention of Go as well
-which means they cannot be accessed in other packages.
-*/
-type employee struct {
-	id       int
-	fullName string
-	deptCode int
-	projects []string
-}
-
-// Animal struct
-type Animal struct {
-	Name   string
-	Origin string
-}
-
-// Bird struct
-type Bird struct {
-	Animal
-	SpeedKPH float32
-	CanFly   bool
-}
-
-// Doctor struct
-type Doctor struct {
-	Name       string `required max:100`
-	Speciality string
+func returnTrue() bool {
+	fmt.Println("Always return true")
+	return true
 }
 
 func main() {
 	// ==================================================
-	// 6.0 Maps and Structs
+	// 7.0 Control Flow
 
 	// ==================================================
-	// 6.1 [Maps] Creation and Manipulation
+	// 7.1 Operators, If statement, If-else statement, If-else-if Statement
+	if true {
+		fmt.Println("This is an if statement block")
+	}
 
-	// Creation: Literal syntax to create a map
 	statePopulations := map[string]int{
-		"California": 12,
-		"Texas":      13,
-		"Florida":    14,
+		"Delhi":       11,
+		"Maharashtra": 12,
+		"Gujrat":      13,
+		"Goa":         14,
 	}
-	fmt.Println(statePopulations)
-
-	/* Basic constraint on a key while creating a map is that it can be tested for equality.
-	Most of the types can be used for key but not all. For example slices and another map.
-	m := map[[]int]int {}  will throw an error saying "Invalid map key type"
-	However arrays are fine. So below code will work just fine.
-	*/
-	m := map[[3]int]int{}
-	fmt.Println(m)
-
-	// Creation: Inbuilt make function to create map
-	countryPopulations := make(map[string]int)
-	countryPopulations = map[string]int{
-		"India": 100,
-		"US":    25,
-		"China": 32,
+	if state, ok := statePopulations["Goa"]; ok {
+		fmt.Println(state)
 	}
-	fmt.Println(countryPopulations)
 
-	// Fetching the value associated with the given key
-	fmt.Println(countryPopulations["India"])   // Key present
-	fmt.Println(countryPopulations["Britain"]) // Key not present will return the value 0
+	// If-else statement and If-else ladder
+	number := 50
+	guess := 30
 
-	// To check if a key is present in the map, we can use below written syntax as well.
-	_, ok := countryPopulations["Britain"]
-	fmt.Println(ok)
-	_, ok = countryPopulations["India"]
-	fmt.Println(ok)
+	if guess < 1 || guess > 100 {
+		fmt.Println("Number should be between 1-100")
+	} else {
+		if guess < number {
+			fmt.Println("Too Low")
+		} else if guess == number {
+			fmt.Println("Correct Answer")
+		} else {
+			fmt.Println("Too High")
+		}
+	}
 
-	// Adding new key
-	countryPopulations["Australia"] = 12
-	fmt.Println(countryPopulations)
-	fmt.Println(countryPopulations["Australia"])
+	// Short-circuiting
+	age := 15
+	if age > 12 || returnTrue() {
+		// Since age > 12 is true, Go compiler will not evaluate rest of the expressions in ||
+		fmt.Println("Passed Teen")
+	}
 
-	// Important: Order of keys is not guaranteed in maps.
+	if age < 12 && returnTrue() {
+		// Since age < 12 is false, Go compiler will not evaluate rest of the expressions in &&
+		fmt.Println("Yet to be a teen")
+	}
 
-	// Deleting keys from the map
-	fmt.Println(countryPopulations)
-	delete(countryPopulations, "Australia")
-	fmt.Println(countryPopulations)
-
-	// len() method will provide the length of map
-	fmt.Println(len(countryPopulations))
-
-	// Map is passed by reference
-	anotherCountryPopulations := countryPopulations
-	delete(anotherCountryPopulations, "India")
-	fmt.Println(countryPopulations)
-	fmt.Println(anotherCountryPopulations)
+	myNum := 0.12345
+	if myNum == math.Pow(math.Sqrt(myNum), 2) {
+		fmt.Println("These are same")
+	} else {
+		fmt.Println("These are different")
+	}
+	// Answer comes out to be "These are different"
+	// Instead use something like this :-
+	if math.Abs(myNum - math.Pow(math.Sqrt(myNum), 2)) < 0.0001{
+		fmt.Println("These are same")
+	} else {
+		fmt.Println("These are different")
+	}
 
 	// ==================================================
-	// 6.2 [Structs] Creation, Naming Conventions, Embedding, and Tags
+	// 7.2 Simple Cases, Multiple tests, Falling through, Type switches
 
-	counter := 0
-	mohit := employee{
-		id:       counter,
-		fullName: "Mohit Sharma",
-		deptCode: deptIT,
-		projects: []string{
-			"DC Migration",
-			"Preorder and Partpayment",
-		},
-	}
-	counter++
-
-	rohit := employee{
-		id:       counter,
-		fullName: "Rohit Sharma",
-		deptCode: deptEE,
-		projects: []string{
-			"Power Plant",
-		},
-	}
-	counter++
-
-	// Accessing specific attribute
-	fmt.Println("Mohit's Projects: ", mohit.projects[0])
-	fmt.Println("Fullname ", mohit.fullName)
-
-	employees := []employee{}
-	employees = append(employees, []employee{mohit, rohit}...)
-	fmt.Println(employees)
-
-	// Anonamous struct
-	vishal := struct {
-		name string
-		age  int8
-	}{
-		name: "Vishal Singh",
-		age:  42,
-	}
-	fmt.Printf("%v,  %T\n", vishal, vishal)
-
-	vishal.age = 26
-	fmt.Printf("%v,  %T\n", vishal, vishal)
-
-	// Unlike maps and slices, structs are passed by values
-	anotherVishal := vishal
-	anotherVishal.age = 101
-	fmt.Println(vishal, '\n', anotherVishal)
-
-	// If you do want to point to the same data, we can use & (address of) operator.
-	sameVishal := &vishal
-	sameVishal.age = 87
-	fmt.Println(vishal, '\n', sameVishal)
-
-	// Embedding - Go doesn't have inheritence. It uses something called composition through embedding
-	b := Bird{}
-	b.Name = "Emu"
-	b.Origin = "Australia"
-	b.SpeedKPH = 48
-	b.CanFly = false
-	fmt.Println(b)
-
-	c := Bird{
-		Animal:   Animal{Name: "Penguin", Origin: "NewZealand"},
-		SpeedKPH: 12,
-		CanFly:   false,
+	switch number := 16;number {
+	case 3, 6, 9:
+		fmt.Println("Multiple of 3")
+	case 4, 8, 12:
+		fmt.Println("Multiple of 4")
+	case 5, 10, 15:
+		fmt.Println("Multiple of 5")
+	default:
+		fmt.Println("Unhandled Case")
 	}
 
-	fmt.Println(c)
+	// Tag-less switch statement
+	// Notice that break keywork is implied here.
+	itr := 10
+	switch {
+	case itr <= 10:
+		fmt.Println("Less than or equal to 10")
+	case itr <= 20:
+		fmt.Println("Less than or equal to 20")
+	default:
+		fmt.Println("Greater than 20")
+	}
 
-	// Tags
-	t := reflect.TypeOf(Doctor{})
-	field, _ := t.FieldByName("Name")
-	fmt.Println(field)
-	fmt.Println(field.Tag)
+	// If however we want to go and check other cases as well, we have to use the keywork fallthrough
+	name := "Mohit"
+	switch {
+	case name == "Mohit":
+		fmt.Println("MySelf")
+		fallthrough
+	case name == "Mohit", name == "Rohit", name == "Vishal":
+		fmt.Println("Friends")
+	default:
+		fmt.Println("Enemies")
+	}
+
+	// Interface tag can take any type assigned to it.
+	// var jtr interface{} = 1
+	// var jtr interface{} = []int{}
+	// var jtr interface{} = "1"
+	var jtr interface{} = 1.
+
+	switch jtr.(type) {
+	case int:
+		fmt.Println("jtr is an int")
+	case float64, float32:
+		fmt.Println("jtr is a floating point number")
+	case string:
+		fmt.Println("jtr is a string")
+	case []int:
+		fmt.Println("jtr is a slice")
+	default:
+		fmt.Println("jtr has unknown type")
+	}
 }
