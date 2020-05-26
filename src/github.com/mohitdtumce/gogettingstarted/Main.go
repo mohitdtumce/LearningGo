@@ -2,130 +2,96 @@ package main
 
 import (
 	"fmt"
-	"math"
 )
-
-func returnTrue() bool {
-	fmt.Println("Always return true")
-	return true
-}
 
 func main() {
 	// ==================================================
-	// 7.0 Control Flow
+	// 8.0 Looping
 
-	// ==================================================
-	// 7.1 Operators, If statement, If-else statement, If-else-if Statement
-	if true {
-		fmt.Println("This is an if statement block")
+	// Simple for loop
+	for i := 0; i < 5; i += 2 {
+		fmt.Println(i)
 	}
 
-	statePopulations := map[string]int{
-		"Delhi":       11,
-		"Maharashtra": 12,
-		"Gujrat":      13,
-		"Goa":         14,
-	}
-	if state, ok := statePopulations["Goa"]; ok {
-		fmt.Println(state)
+	// More than one iterators
+	for i, j := 1, 0; i < 20; i, j = i*2, j+1 {
+		fmt.Println(i, j)
 	}
 
-	// If-else statement and If-else ladder
-	number := 50
-	guess := 30
+	// Now iterator is scoped to main method instead of just the for-loop
+	// Iterator and Increment expressions inside the for-loop body
+	itr := 0
+	for itr < 5 {
+		fmt.Println("Another form", itr)
+		itr++
+	}
 
-	if guess < 1 || guess > 100 {
-		fmt.Println("Number should be between 1-100")
-	} else {
-		if guess < number {
-			fmt.Println("Too Low")
-		} else if guess == number {
-			fmt.Println("Correct Answer")
-		} else {
-			fmt.Println("Too High")
+	// break keyword
+	jtr := 1
+	for {
+		fmt.Print(jtr, " ")
+		if jtr == 10 {
+			fmt.Println()
+			break
 		}
+		jtr++
 	}
 
-	// Short-circuiting
-	age := 15
-	if age > 12 || returnTrue() {
-		// Since age > 12 is true, Go compiler will not evaluate rest of the expressions in ||
-		fmt.Println("Passed Teen")
+	// continue keywork
+	for i := 1; i < 4; i++ {
+		if i%2 == 0 {
+			continue
+		}
+		fmt.Println(i)
 	}
 
-	if age < 12 && returnTrue() {
-		// Since age < 12 is false, Go compiler will not evaluate rest of the expressions in &&
-		fmt.Println("Yet to be a teen")
+	// Nested for-loops
+	for i := 1; i <= 4; i++ {
+		for j := 1; j <= i; j++ {
+			fmt.Print("*")
+		}
+		fmt.Println()
 	}
 
-	myNum := 0.12345
-	if myNum == math.Pow(math.Sqrt(myNum), 2) {
-		fmt.Println("These are same")
-	} else {
-		fmt.Println("These are different")
-	}
-	// Answer comes out to be "These are different"
-	// Instead use something like this :-
-	if math.Abs(myNum - math.Pow(math.Sqrt(myNum), 2)) < 0.0001{
-		fmt.Println("These are same")
-	} else {
-		fmt.Println("These are different")
-	}
-
-	// ==================================================
-	// 7.2 Simple Cases, Multiple tests, Falling through, Type switches
-
-	switch number := 16;number {
-	case 3, 6, 9:
-		fmt.Println("Multiple of 3")
-	case 4, 8, 12:
-		fmt.Println("Multiple of 4")
-	case 5, 10, 15:
-		fmt.Println("Multiple of 5")
-	default:
-		fmt.Println("Unhandled Case")
+	// To break from all the loops under the label 'MyLabel'
+	MyLabel:
+	for i := 1; i <= 5; i++ {
+		for j := 1; j <= 5; j++ {
+			if i*j >= 8 {
+				fmt.Println()
+				break MyLabel
+			}
+			fmt.Print(i * j)
+		}
+		fmt.Println()
 	}
 
-	// Tag-less switch statement
-	// Notice that break keywork is implied here.
-	itr := 10
-	switch {
-	case itr <= 10:
-		fmt.Println("Less than or equal to 10")
-	case itr <= 20:
-		fmt.Println("Less than or equal to 20")
-	default:
-		fmt.Println("Greater than 20")
+	// Iterating over a collection using for-range
+	s := []int{11, 12, 13}
+	for k, v := range s {
+		fmt.Println(k, v)
 	}
 
-	// If however we want to go and check other cases as well, we have to use the keywork fallthrough
-	name := "Mohit"
-	switch {
-	case name == "Mohit":
-		fmt.Println("MySelf")
-		fallthrough
-	case name == "Mohit", name == "Rohit", name == "Vishal":
-		fmt.Println("Friends")
-	default:
-		fmt.Println("Enemies")
+	covidCases := map[string]float32{
+		"USA":    1.708,
+		"Brazil": 0.376,
+		"Russia": 0.362,
 	}
 
-	// Interface tag can take any type assigned to it.
-	// var jtr interface{} = 1
-	// var jtr interface{} = []int{}
-	// var jtr interface{} = "1"
-	var jtr interface{} = 1.
+	for k, v := range covidCases {
+		fmt.Println(k, v)
+	}
 
-	switch jtr.(type) {
-	case int:
-		fmt.Println("jtr is an int")
-	case float64, float32:
-		fmt.Println("jtr is a floating point number")
-	case string:
-		fmt.Println("jtr is a string")
-	case []int:
-		fmt.Println("jtr is a slice")
-	default:
-		fmt.Println("jtr has unknown type")
+	for k := range covidCases {
+		fmt.Print(k, )
+	}
+
+	for _, v := range covidCases {
+		fmt.Print(v, )
+	}
+
+	str := "Hello World!!"
+	for k, v := range str {
+		fmt.Println(k, string(v))
 	}
 }
