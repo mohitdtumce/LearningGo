@@ -2,111 +2,118 @@ package main
 
 import (
 	"fmt"
-	"math"
-)
-
-// Constant declared at package level.
-const random string = "Mohit Sharma"
-
-// Constant block
-const (
-	// iota is like a counter
-	_ = iota + 5
-	alpha
-	beta
-	gamma
-)
-
-// We are using a blank identifier.
-// => Yes we know this is going to return a value but we don't care what value it returns.
-const (
-	_  = iota
-	KB = float64(1 << (10 * iota))
-	MB
-	GB
-	TB
-	PB
-	EB
-	ZB
-)
-
-const (
-	isAdmin = 1 << iota
-	isHeadquarters
-	canSeeFinancial
-
-	canSeeAfrica
-	canSeeAsia
-	canSeeEurope
-	canSeeNorthAmerica
-	canSeeSouthAmerica
 )
 
 func main() {
 	// ==================================================
-	// 4.0 Constants
+	// 5.0 Arrays and Slices
 
 	// ==================================================
-	// 4.1 Naming Convention
-	// All constants are proceeded with the const keyword.
-	// If you want to export the const to the outside world, use PascalCase
-	const Exportable float64 = math.Pi
-	fmt.Printf("%v, %T\n", Exportable, Exportable)
-	// Else you can just use normal camelCase
-	const myConst int = 101
-	fmt.Printf("%v, %T\n", myConst, myConst)
+	// 5.1 [Arrays] Creation & Built-in functions
+	// Arrays are collection of items with same type.
+	// Arrays have fixed size.
 
-	// Needless to say that reassigning value of constant (for ex: myConst = 32) won't work.
-	// Value of constant must be determined at compile time and not runtime.
-	// Therefore (const myAnotherConst float64 = math.sin(1.57)) won't work as well.
-	// This is because value of math.sin(1.57) will be determined at runtime.
+	// Declaration - 1/3
+	arr1 := [3]string{"Mohit", "Rohit", "Vishal"}
+	fmt.Println(arr1)
 
-	// Constants can be made up of any primitive types that we discussed earlier.
-	const a int = 12
-	const b float64 = 3.14
-	const c bool = true
-	const d complex128 = 1 + 1i
-	const e string = "This is also a constant"
-	fmt.Printf("%v, %T\n", a, a)
-	fmt.Printf("%v, %T\n", b, b)
-	fmt.Printf("%v, %T\n", c, c)
-	fmt.Printf("%v, %T\n", d, d)
-	fmt.Printf("%v, %T\n", e, e)
+	// Declaration - 2/3
+	arr2 := [...]string{"Mohit", "Rohit", "Vishal"}
+	fmt.Println(arr2)
 
-	// Note -> Arrays will always be variable type
-	// Note -> Constants can be shadowed. Notice we declare a constant shadow on package level.
-	// We can redeclare the constant inside the block. Inner block will get precedence.
-	fmt.Printf("%v, %T\n", random, random)
-	const random float64 = 10000.0
-	fmt.Printf("%v, %T\n", random, random)
-	// ==================================================
-	// 4.2 Typed constants and untyped constants
-	// So far we've discussed typed constants where we specify type of the constant in the declaration statement.
-	// But we don't necessarily have to do that. We can use compiler's ability to infer the type for us.
-	const myYetAnotherConst = 3.14
-	fmt.Printf("Untyped constant: %v, %T\n", myYetAnotherConst, myYetAnotherConst)
+	// Declaration - 3/3
+	var arr3 [5]string 
+	arr3 = [...]string{"Mohit", "Rohit", "Vishal", "Rajat", "Danish"}
+	fmt.Println(arr3)
 
-	const w = 42
-	var x = 12.
-	var y = 1 + 32i
-	fmt.Printf("%v, %T\n", w+x, w+x) // Compiler sees this as 42 + x and interpret the type based on the type of x
-	fmt.Printf("%v, %T\n", w+y, w+y) // Notice the type of w+x and w+y
-	// So compiler did implicit type conversion in case of untyped constants which we cannot do in case of variables
+	var grades [5]int
+	grades = [5]int{77, 95, 95, 88, 80}
+	// Arrays are passed by value. So copies refer to different underlying data
+	anotherGrades := grades  
+	anotherGrades[0] = 100
+	fmt.Printf("Grades: %v\n", grades)
+	fmt.Printf("Another Grades: %v\n", anotherGrades)
+
+	const row, col = 5, 3
+	matrix := [row][col]int{{}}
+	for i := 0; i < row; i++ {
+		for j := 0; j < col; j++ {
+			matrix[i][j] = i + j
+		}
+	}
+	fmt.Println(matrix)
+
+	var identityMatrix [3][3]int = [3][3] int{{1, 0, 0}, {0, 1, 0}, {0, 0, 1}}
+	fmt.Println(identityMatrix)
+
+	// To find the length of array, we can use inbuilt function len()
+	fmt.Println(len(grades))
+	// len() method returns the size of array
+	fmt.Println(len(matrix), len(matrix[0]))
+	fmt.Println(len(identityMatrix), len(identityMatrix[0]))
 
 	// ==================================================
-	// 4.3 Enumerated Constants
-	fmt.Printf("%v\n", alpha)
-	fmt.Printf("%v\n", beta)
-	fmt.Printf("%v\n", gamma)
+	// 5.2 [Slices] Creation & Built-in functions
+	// Slices are backed by Arrays. They don't have fixed size.
+	slc := []int{1, 2, 3, 4, 5, 6}
+	slc1 := slc // Slices are passed by reference
+	slc1[0] = 100
+	fmt.Println(slc, slc1)
+	
+	fmt.Printf("Size: %v, %v\n", len(slc), len(slc1))
+	fmt.Printf("Capacity: %v %v\n", cap(slc), cap(slc1))
 
-	// ==================================================
-	// 4.4 Enumeration Expression
-	filesize := 4000000000.
-	fmt.Println(KB, MB, GB, TB, PB, EB, ZB)
-	fmt.Printf("%.2fGB\n", filesize/GB)
+	// Slicing operation
+	a := []int{1, 2, 3, 4, 5, 6, 7, 8, 9, 10}
+	b := a[:]
+	c := a[3:]
+	d := a[:6]
+	e := a[3:6]
+	fmt.Println(a ,"\n",b ,"\n",c ,"\n",d ,"\n", e)
 
-	var roles byte = isAdmin | canSeeFinancial | canSeeEurope
-	fmt.Printf("%b\n", roles)
+	// As mentioned, slices are passed by reference
+	// So change in any slice object will change the underlying data.
+	a[5] = 42
+	fmt.Println(a ,"\n",b ,"\n",c ,"\n",d ,"\n", e)
 
-	fmt.Printf("Is Admin? %v\n", isAdmin&roles == isAdmin)
+	// Using in-built method to create slices
+	f := make([]int, 5, 100)
+	fmt.Println(f, len(f), cap(f))
+
+	g := []int{}
+	fmt.Println(g, len(g), cap(g))
+
+	g = append(g, 1)
+	fmt.Println(g, len(g), cap(g))
+
+	g = append(g, 2, 3, 4, 5)
+	fmt.Println(g, len(g), cap(g))
+
+	g = append(g, []int{6, 7, 8, 9, 10}...)
+	fmt.Println(g, len(g), cap(g))
+
+	h := []int{11, 12, 13, 14}
+	g = append(g, h...)
+	fmt.Println(g, len(g), cap(g))
+
+	// Slices as stacks and queues
+	// Removing the first element (FIFO)
+	m := []int{1, 2, 3, 4, 5}
+	for len(m) > 0 {
+		fmt.Println(m)
+		m = m[1:]
+	}
+	// Removing the last element (LIFO)
+	n := []int{1, 2, 3, 4, 5, 6, 7, 8}
+	for len(n) > 0 {
+		fmt.Println(n)
+		n = n[:len(n)-1]
+	}
+
+	// Removing a subarray of elements from the middle of the slice
+	// For example: Removing 4, 5, 6
+	o := []int{1, 2, 3, 4, 5, 6, 7, 8, 9, 10}
+	o = append(o[:3], o[6:]...)
+	fmt.Println(o)
+
 }
