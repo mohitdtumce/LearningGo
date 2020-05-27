@@ -4,72 +4,155 @@ import (
 	"fmt"
 )
 
-func main() {
-	// ==================================================
-	// 10.0 Pointers - 
-	/*
-		1. Creating Pointers, 
-		2. Dereferencing pointers, 
-		3. The new function, 
-		4. Working with nil and 
-		5. Types with internal pointers
-	*/
-	
-	var a int = 42
-	// b is a pointer to integer which is holding memory address of a
-	var b *int = &a 
-	
-	// To get the address of a variable, we use & operator
-	fmt.Println("Memory address where a is stored: ", &a, b)
-	
-	// Dereferencing the pointer will give us the value stored at the memory address which pointer is pointing to.
-	// Type of the pointer will specify how many bytes to read at the pointed memory address.
-	fmt.Println("Value stored at the location is: ", a, *b) 		
-	
-	a = 27
-	fmt.Println("Value stored at the location is: ", a, *b)
-	
-	*b = 36 
-	fmt.Println("Value stored at the location is: ", a, *b)
-	
-	// // Pointer arithmetics :- Go does not support pointer arithmetics to keep it simple.
-	// If however you wish to use pointer arithmetics in the code, you can use "unsafe" package
-	// https://golang.org/pkg/unsafe/
-	p := [3]int32{1, 2,3 }
-	q := &p[0]
-	r := &p[1]
-	fmt.Printf("%v, %p, %p, %p", p, &p, q, r)
-
-	// Pointer to user defined object struct
-	var mPtr *myStructs
-	mPtr = &myStructs{foo: 42}
-	fmt.Println(mPtr)
-
-	// The new function
-	var nPtr *myStructs
-	fmt.Println(nPtr) 		// Will hold the value nil
-	nPtr = new(myStructs)	// We got uninitialized object here
-	(*nPtr).foo = 36		// Dereferencing the pointer to set the value of objects
-	fmt.Println(*nPtr) 
-
-
-	// Primitives, Arrays, String, Object are passed by value unless we are using pointers
-	mohit := myStructs{foo: 42}
-	rohit := mohit
-	rohit.foo = 36
-	fmt.Println(mohit, rohit)
-
-	// Maps, Slices are passed by reference
-	amohit := map[string]string {
-		"foo":"bar",
-		"baz":"buz",
-	}
-	arohit := amohit
-	arohit["foo"] = "car"
-	fmt.Println(amohit, arohit)
-
+func sayMessage(msg, name *string) {
+	fmt.Println(*msg, *name)
+	*name = "Ted"
+	fmt.Println(*name)
 }
 
-type myStructs struct {
-	foo int
+func sum(msg string, values ...int) {
+	fmt.Println(values)
+	result := 0
+	for _, v := range values {
+		result += v
+	}
+	fmt.Println(msg, result)
+}
+
+func summation(values ...int) int {
+	fmt.Println("Summation returning result :-")
+	fmt.Println(values)
+	result := 0
+	for _, v := range values {
+		result += v
+	}
+	return result
+}
+
+func summationPtr(values ...int) *int {
+	fmt.Println("Summation returning pointer to local variable :-")
+	fmt.Println(values)
+	result := 0
+	for _, v := range values {
+		result += v
+	}
+	return &result
+}
+
+func summationNamed(values ...int) (result int) {
+	// Named returns
+	fmt.Println(values)
+	for _, v := range values {
+		result += v
+	}
+	// Naked return
+	return
+}
+
+func division(a, b float64) (float64, error) {
+	fmt.Println("Multiple returns")
+	if b == 0.0 {
+		return 0.0, fmt.Errorf("Cannot divide by zero")
+	}
+	return a / b, nil
+}
+
+// Method for a struct
+type greeter struct {
+	greeting string
+	name string
+}
+
+func (g greeter) sayHello() {
+	g.name = "Rohit"
+	fmt.Println(g.greeting + " " + g.name)
+}
+
+func (g *greeter) sayHi(){
+	(*g).name = "Rohit"
+	fmt.Println((*g).greeting + " " + (*g).name)
+}
+
+// /*
+// Go does not support function overloading and does not support user defined operators.
+// While Go still does not have overloaded functions (and probably never will), the most useful feature of overloading,
+// that of calling a function with optional arguments and inferring defaults for those omitted can be simulated using
+// a variadic function, which has since been added. But this comes at the loss of type checking
+// */
+// func sayMessage(msg, name string) {
+// }
+
+func main() {
+	// ==================================================
+	// 11.0 Functions -
+	/*
+		1. Basic Syntax,
+		2. Parameters,
+		3. Return values,
+		4. Anonymous functions
+		5. Functions as types
+		6. Methods
+	*/
+
+	greetings := "Hello"
+	name := "Stacey"
+	// Apart from slices and maps which use internal pointers, variables are passed by values.
+	// So if you want to make changes in the original copy, make sure to pass variables
+	sayMessage(&greetings, &name)
+	fmt.Println(name)
+
+	// Variadic Parameters
+	sum("The sum is:", 1, 2, 3, 4, 5)
+	fmt.Println(summation(1, 2, 3, 4, 5))
+
+	resultPtr := summationPtr(1, 2, 3, 4, 5)
+	fmt.Println(*resultPtr)
+
+	result := summationNamed(1, 2, 3, 4, 5)
+	fmt.Println(result)
+
+	quo, err := division(12.0, 0.0)
+	if err != nil {
+		fmt.Println(err)
+	} else {
+		fmt.Println(quo)
+	}
+
+	// Anonymous function :- Generally used to generate isolated scope
+	func ()  {
+		fmt.Println("Anonymous Function")
+	}()
+
+	// Passing arguments in anomymous function
+	func (name string, age int)  {
+		fmt.Println(name, age)
+	}("Mohit", 24)
+
+	// Functions as types
+	var f func() = func ()  {
+		fmt.Println("Yo Bro!!")
+	}
+
+	f()
+
+	divide := func(a, b float64) (float64, error){
+		fmt.Println("Multiple returns")
+		if b == 0.0 {
+			return 0.0, fmt.Errorf("Cannot divide by zero")
+		}
+		return a / b, nil
+	}
+
+	d, e := divide(12.0, 5.0)
+	if e != nil {
+		fmt.Println(e)
+	} else {
+		fmt.Println(d)
+	}
+
+	g := greeter { greeting: "Hello", name: "Mohit",}
+	g.sayHello()
+	fmt.Println(g.name)
+	(&g).sayHi()
+	fmt.Println(g.name)
 }
