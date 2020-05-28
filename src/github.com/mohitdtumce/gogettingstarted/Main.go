@@ -2,163 +2,165 @@ package main
 
 import (
 	"fmt"
-	"runtime"
 	"sync"
 	"time"
 )
 
 // ==================================================
-// Example 1
-func sayHello() {
-	fmt.Println("Hello")
-}
-
-// ==================================================
-// Example 3 : Using WaitGroups
 var wg = sync.WaitGroup{}
 
-var counter = 0
-
-func greet() {
-	fmt.Printf("Hola Mi Amigo #%v\n", counter)
-	wg.Done()
-}
-
-func increment() {
-	counter++
-	wg.Done()
-}
-
 // ==================================================
-// Example 4 : Using Mutex
-var wgroup = sync.WaitGroup{}
-var ctr = 0
+const (
+	logDebug   = "DEBUG"
+	logInfo    = "INFO"
+	logWarning = "WARNING"
+	logError   = "ERROR"
+)
 
-/* 
-	A RWMutex is a reader/writer mutual exclusion lock. 
-	The lock can be held by an arbitrary number of readers or a single writer. 
-	The zero value for a RWMutex is an unlocked mutex.
-*/
-var m = sync.RWMutex{}
-
-func sayHi() {
-	fmt.Printf("Hola Mi Amigo #%v\n", ctr)
-	m.RUnlock()
-	wgroup.Done()
+type logEntry struct {
+	time     time.Time
+	severity string
+	message  string
 }
 
-func increase() {
-	ctr++
-	fmt.Println("Increasing ctr", ctr)
-	m.Unlock()
-	wgroup.Done()
+var logCh = make(chan logEntry, 50)
+var doneCh = make(chan struct{})
+
+func logger() {
+	for {
+		select {
+		case entry := <-logCh:
+			fmt.Printf("%v - [%v]%v\n", entry.time.Format("2006-01-02T15:04:05"), entry.severity, entry.message)
+		case <-doneCh:
+			break
+		}
+
+	}
 }
 
 func main() {
 	// ==================================================
-	// 13.0 Goroutines -
+	// 14.0 Channels -
 	/*
-		1. Create Goroutines,
-		2. Synchronization,
-			a. WaitGroups
-			b. Mutexes
-		3. Parallelism
-		4. Best Practices & Tools
+		1. Channel basics
+		2. Restricting data flow
+		3. Buffered channels
+		4. Closing channels
+		5. For...range loops with channels
+		6. Select statement
 	*/
 
-	// Example 1: Simple Example of Goroutine
-	go sayHello()
-	time.Sleep(100 * time.Millisecond)
+	// Channels are the pipes that connect concurrent goroutines.
+	// You can send values into channels from one goroutine and receive those values into another goroutine.
 
-	// Example 2: Using Anonymous function
-	/*
-		Notice that we have created a dependency between main function and the goroutine.
-		Our anonymous function here is dependent on main function for the variable msg. This can cause problem.
-		Output for the below code snippet is "Goodnight". This is because in most of the cases compiler will not interrupt main() function unless it executes Sleep() method.
-		It essentially means that even though it spawns another goroutine inside the main() function, it will not provide any CPU to newly spawned goroutine and it is still executing main() function.
-		So instead of printing "Hello Again", it is printing "Goodnight". This is called race-condition and something which we want to avoid.
-	*/
-	var msg = "Hello Again"
+	// Channels are strongly typed => An integer channel can be used to send only int data
+	ch := make(chan int)
+	wg.Add(2)
+
 	go func() {
-		fmt.Println(msg)
-	}()
-	msg = "Goodnight"
-	time.Sleep(100 * time.Millisecond)
-
-	/*
-		To solve the above mentioned problem, use parameters.
-		Since string is passed by value, we have actually decoupled anotherMessage variable in the main() from the msg variable of the anonymous function.
-	*/
-	var anotherMessage = "Hello Yet Again"
-	go func (msg string)  {
-		fmt.Println(msg)
-	}(anotherMessage)
-
-	anotherMessage = "Goodnight Again"
-	time.Sleep(100 * time.Millisecond)
-
-	/*
-		The solve mentioned above is not the best practices because we are using the Sleep call and thus binding/degrading the performance of the application.
-		Alternative for that is to use WaitGroup. The task of WaitGroup is to synchronize multiple goroutines together.
-
-		For ex: In this case we want to synchronize, we want to
-	*/
-
-	// Example 3: Using WaitGroups
-	var message = "Hello"
-	wg.Add(1)
-	go func (message string)  {
-		fmt.Println(message)
+		// Pulling data from the channel and assign it to the variable i.e in the direction of arrow
+		i := <-ch
+		fmt.Println("Pulling data from the channel", i)
 		wg.Done()
-	}(message)
-	message = "Adiós"
+	}()
+
+	go func() {
+		// data flows into the channel
+		fmt.Println("Sending data into the channel")
+		ch <- 42
+		wg.Done()
+	}()
 	wg.Wait()
 
-	/*
-		In the above example, we are synchronizing two goroutines together but only one of the goroutine is really doing the work.
-		main() function is just storing data and spawing other goroutines.
-		But we can have more than one goroutines working on the same data and we might need to synchronize those together.
-	*/
-	for i := 0; i < 10; i++ {
-		wg.Add(2)
-		go greet()
-		go increment()
+	// Example 2: Restricting data flow. Send only and receive only channel
+	wg.Add(2)
+	// This is receive only channel
+	go func(ch <-chan int) {
+		// Pulling data from the channel and assign it to the variable i.e in the direction of arrow
+		i := <-ch
+		fmt.Println("Pulling data from the channel", i)
+		wg.Done()
+	}(ch)
+
+	// This is send only channel
+	go func(ch chan<- int) {
+		// data flows into the channel
+		fmt.Println("Sending data into the channel")
+		ch <- 42
+		wg.Done()
+	}(ch)
+
+	wg.Wait()
+
+	// Example 3: In this case there are 5 producer goroutines spawned inside for loop but just one consumer goroutine.
+	// So, the following code snippet will give fatal error: all goroutines are asleep - deadlock!
+	wg.Add(1)
+	go func() {
+		// Pulling data from the channel and assign it to the variable i.e in the direction of arrow
+		i := <-ch
+		fmt.Println("Pulling data from the channel", i)
+		wg.Done()
+	}()
+
+	for i := 0; i < 5; i++ {
+		wg.Add(1)
+		go func() {
+			// data flows into the channel
+			fmt.Println("Sending data into the channel")
+			ch <- 42
+			wg.Done()
+		}()
 	}
 	wg.Wait()
 
 	/*
-		In the above example goroutines are racing against each other and there is not synchronization whatsoever.
-		In order to correct this we need to find a way to synchronize these.
-		We are going to introduce something called mutex.
+		Now to solve this problen we use Buffered Channels.
+		Channels can be buffered. Provide the buffer length as the second argument to make to initialize a buffered channel:
+			ch := make(chan int, 100)
+
+		By default channels are unbuffered, meaning that they will only accept sends (chan <-) if there is a corresponding receive (<- chan) ready to receive the sent value.
+		Buffered channels accept a limited number of values without a corresponding receiver for those values.
 	*/
 
-	/*
-		GOMAXPROCS sets the maximum number of CPUs that can be executing simultaneously and returns the previous setting.
-		If n < 1, it does not change the current setting. The number of logical CPUs on the local machine can be queried with NumCPU.
-		This call will go away when the scheduler improves.
-	*/
+	chnl := make(chan int, 5)
+	wg.Add(2)
+	go func(chnl <-chan int) {
+		// For range construct for...range loop
+		for {
+			if val, ok := <-chnl; ok {
+				fmt.Println(val)
+			} else {
+				break
+			}
+		}
+		wg.Done()
+	}(chnl)
 
-	// Example 4: Locking resouces using Mutex
-	runtime.GOMAXPROCS(100)
-	for i := 0; i < 10; i++ {
-		// main function is executing the locks and the spawned goroutines are asynchronously unlocking it once they're done.
-		wgroup.Add(2)
-		m.RLock()
-		go sayHi()
-		m.Lock()
-		go increase()
+	go func(chnl chan<- int) {
+		chnl <- 12
+		chnl <- 56
+		// Closing a channel indicates that no more values will be sent on it.
+		// This can be useful to communicate completion to the channel’s receivers.
+		close(chnl)
+		wg.Done()
+	}(chnl)
+
+	wg.Wait()
+
+	// Select statement for channels
+	go logger()
+	logCh <- logEntry{
+		time:     time.Now(),
+		severity: logInfo,
+		message:  "App is starting",
 	}
-	wgroup.Wait()
 
-	// But above process doesn't perform well because we are constantly locking/unlocking it. Infact it would have worked better without goroutines. However it can be beneficial in cases.
+	logCh <- logEntry{
+		time:     time.Now(),
+		severity: logInfo,
+		message:  "App is shutting down",
+	}
 
-	fmt.Println(runtime.GOMAXPROCS(-1))
-
-	// Best Practices
-	/*
-		1. Don't create goroutines in libraries. Let consumer control concurrency.
-		2. When creating a goroutine, know how it will end. Aboid subtle memory leaks
-		3. Check for race-condition at compile time. try running "go run -race /path/to/main/file/main_file.go"
-		4.  
-	*/
+	time.Sleep(100 * time.Millisecond)
+	doneCh <- struct{}{}
 }
